@@ -7,17 +7,21 @@ import fitz
 
 from models import PaperMetadata, ParsedPaper, ParsedSection
 
-
 SECTION_PATTERN = re.compile(
-    r"^(abstract|introduction|background|related work|method|methods|experiments|results|discussion|conclusion|limitations)\s*$",
+    r"^(\d+\.?\s*)?(abstract|introduction|background|related work|problem statement|method|methods|approach|experiments|experimental setup|results|discussion|conclusion|limitations|future work)\s*$",
     re.IGNORECASE,
 )
 
 
 def extract_text_from_pdf(pdf_path: Path) -> str:
+    if not pdf_path.exists():
+        raise FileNotFoundError(f"PDF not found: {pdf_path}")
     doc = fitz.open(pdf_path)
-    pages = [page.get_text("text") for page in doc]
-    return "\n".join(pages)
+    pages: list[str] = []
+    for page in doc:
+        text = page.get_text("text") or ""
+        pages.append(text.strip())
+    return "\n\n".join(pages)
 
 
 def parse_sections(raw_text: str) -> list[ParsedSection]:
@@ -32,10 +36,10 @@ def parse_sections(raw_text: str) -> list[ParsedSection]:
         if SECTION_PATTERN.match(line):
             if buffer:
                 sections.append(ParsedSection(name=current_name, content="\n".join(buffer)))
-            current_name = line.title()
+            current_name = re.sub(r"^\d+\.?\s*", "", line).title()
             buffer = []
-        else:
-            buffer.append(line)
+            continue
+        buffer.append(line)
 
     if buffer:
         sections.append(ParsedSection(name=current_name, content="\n".join(buffer)))
@@ -43,13 +47,21 @@ def parse_sections(raw_text: str) -> list[ParsedSection]:
     return sections
 
 
+def _extract_title(raw_text: str) -> str:
+    candidates = [ln.strip() for ln in raw_text.splitlines() if ln.strip()]
+    for c in candidates[:30]:
+        if len(c) > 20 and not c.lower().startswith("arxiv") and "@" not in c:
+            return c[:220]
+    return candidates[0][:220] if candidates else "Untitled Paper"
+
+
 def parse_paper(pdf_path: Path) -> ParsedPaper:
     raw = extract_text_from_pdf(pdf_path)
     sections = parse_sections(raw)
 
-    title = next((s for s in raw.splitlines() if s.strip()), "Untitled Paper")[:200]
-    abstract = next((s.content for s in sections if s.name.lower() == "abstract"), None)
-    references_count = raw.lower().count("reference")
+    title = _extract_title(raw)
+    abstract = next((s.content for s in sections if "abstract" in s.name.lower()), None)
+    references_count = raw.lower().count("reference") + raw.lower().count("bibliography")
 
     metadata = PaperMetadata(title=title)
     return ParsedPaper(metadata=metadata, abstract=abstract, sections=sections, references_count=references_count)
