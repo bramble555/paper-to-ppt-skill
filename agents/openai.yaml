@@ -1,0 +1,19 @@
+name: paper_to_ppt_agent
+description: >
+  Orchestrates academic paper parsing and graduate-level presentation generation.
+defaults:
+  model: gpt-5
+  temperature: 0.2
+  max_output_tokens: 3200
+runtime:
+  env:
+    OPENAI_API_KEY: required
+    OPENAI_MODEL: optional
+capabilities:
+  - pdf_ingestion
+  - paper_section_parsing
+  - slide_planning
+  - pptx_generation
+  - html_preview_generation
+entrypoint:
+  command: python scripts/run_pipeline.py
