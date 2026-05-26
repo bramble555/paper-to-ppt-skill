@@ -1,14 +1,10 @@
 name: paper_to_ppt_agent
 description: >
-  Orchestrates academic paper parsing and graduate-level presentation generation.
+  Agent-first orchestration for academic paper parsing and presentation generation.
 defaults:
-  model: gpt-5
-  temperature: 0.2
-  max_output_tokens: 3200
+  model: agent-default
 runtime:
-  env:
-    OPENAI_API_KEY: required
-    OPENAI_MODEL: optional
+  mode: agent_managed
 capabilities:
   - pdf_ingestion
   - paper_section_parsing

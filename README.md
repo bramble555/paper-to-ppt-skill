@@ -1,64 +1,57 @@
 # paper-to-ppt-skill
 
-Agent-agnostic Codex Skill repository for automating:
+Agent-agnostic Codex Skill for automating:
 
 `Academic PDF -> parsing -> structured understanding -> graduate-level slides -> editable PPTX`
 
-## CLI Installation (Skill-first, Agent-agnostic)
-Install via CLI (example):
-
+## 安装（CLI）
 ```bash
 npx skills add https://github.com/bramble555/paper-to-ppt-skill
 ```
 
-This repository is designed as a reusable skill package and can be orchestrated by different agents/runtimes.
+> 这个 skill 设计为“下载后直接在 Codex / Antigravity 里运行”，不要求用户自己配置本地 Python 虚拟环境或 OpenAI API Key。
 
-## Features
-- PDF text extraction (PyMuPDF)
-- Section parsing for academic structure
-- LLM-driven structured slide planning
-- Editable `.pptx` generation with speaker notes
-- Template-based HTML preview generation
-- Modular, extensible pipeline
+## 使用方式（Agent 内直接运行）
+在 Codex 或 Antigravity 中调用本 skill，传入论文 PDF 路径与输出目录。
 
-## Repository Layout
-- `SKILL.md` — Codex skill trigger and behavior definition
-- `agents/openai.yaml` — optional OpenAI runtime defaults (not required by all agents)
-- `scripts/` — pipeline modules and CLI
-- `references/` — prompt templates and schema
-- `templates/` — PPT + HTML templates
-- `assets/` — HTML theme assets
-- `examples/` — runnable example command(s)
-- `requirements.txt` — Python dependencies
-
-## Local Setup
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-export OPENAI_API_KEY="your_key_here"
-```
-
-## Run
+示例命令：
 ```bash
 python scripts/run_pipeline.py \
   --pdf /path/to/paper.pdf \
   --output-dir ./out \
-  --model gpt-5 \
   --ppt-theme templates/default_theme.json \
   --html-template templates/html/base.html \
   --html-preview
 ```
 
-## Outputs
-- `out/presentation.pptx` (fully editable)
-- `out/preview.html` + `out/assets/slide-theme.css` (optional)
+## Agent-first 工作流
+1. `run_pipeline.py` 解析 PDF，输出 `parsed_paper.json`。
+2. 如需由 Agent 生成高质量 slide plan，可先导出提示词：
+   ```bash
+   python scripts/run_pipeline.py --pdf /path/to/paper.pdf --output-dir ./out --emit-agent-prompt
+   ```
+3. 将 `out/agent_prompt.txt` 交给 Codex/Antigravity agent，生成 `slide_plan.json`。
+4. 回填并生成最终 PPT：
+   ```bash
+   python scripts/run_pipeline.py \
+     --pdf /path/to/paper.pdf \
+     --output-dir ./out \
+     --agent-slide-plan-json ./out/slide_plan.json \
+     --html-preview
+   ```
+
+> 若未提供 `--agent-slide-plan-json`，系统会使用内置 fallback 规划器生成可编辑草稿，供二次润色。
+
+## 输出
+- `out/presentation.pptx`（可编辑）
+- `out/preview.html` + `out/assets/slide-theme.css`（可选）
 - `out/parsed_paper.json`
 - `out/slide_plan.json`
+- `out/agent_prompt.txt`（可选）
 
-## Template Integration Notes
-This skill now includes an upgraded template-driven HTML preview and slide visual pipeline inspired by and adapted from the following projects:
-- https://github.com/zarazhangrui/beautiful-html-templates
-- https://github.com/zarazhangrui/frontend-slides
-
-Use `templates/html/base.html` and `assets/slide-theme.css` as the default frontend-slide style basis, and customize per lab/conference branding.
+## 结构
+- `SKILL.md`：skill 触发与流程说明
+- `scripts/`：解析、规划、渲染流水线
+- `templates/`：PPT / HTML 模板
+- `assets/`：预览样式
+- `references/`：prompt 与 schema
