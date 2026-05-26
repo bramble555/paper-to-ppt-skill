@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["deck_title", "slides"],
+  "properties": {
+    "deck_title": { "type": "string" },
+    "slides": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["section", "title", "bullets", "speaker_notes"],
+        "properties": {
+          "section": { "type": "string" },
+          "title": { "type": "string" },
+          "bullets": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 2,
+            "maxItems": 6
+          },
+          "speaker_notes": { "type": "string" }
+        }
+      }
+    }
+  }
+}
