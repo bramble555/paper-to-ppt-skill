@@ -1,0 +1,7 @@
+:root { --bg:#0b1020; --panel:#141b2d; --text:#e8ecff; --muted:#9aa6d1; --accent:#70a5ff; }
+*{box-sizing:border-box} body{margin:0;background:linear-gradient(145deg,#090d1a,#0d1730);font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--text)}
+.deck{max-width:1100px;margin:0 auto;padding:32px;display:grid;gap:24px}
+.slide{background:var(--panel);border:1px solid #1f2a44;border-radius:14px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+h2{margin:0 0 8px;font-size:1.8rem}.section{margin:0 0 18px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-size:.78rem}
+ul{margin:0 0 18px;padding-left:22px} li{margin:8px 0;line-height:1.35}
+aside{border-top:1px dashed #2a385d;padding-top:10px;color:var(--muted)} aside h4{margin:0 0 6px;color:var(--accent)}

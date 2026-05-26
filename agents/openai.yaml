@@ -1,0 +1,15 @@
+name: paper_to_ppt_agent
+description: >
+  Agent-first orchestration for academic paper parsing and presentation generation.
+defaults:
+  model: agent-default
+runtime:
+  mode: agent_managed
+capabilities:
+  - pdf_ingestion
+  - paper_section_parsing
+  - slide_planning
+  - pptx_generation
+  - html_preview_generation
+entrypoint:
+  command: python scripts/run_pipeline.py

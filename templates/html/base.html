@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>{{ deck_title }}</title>
+    <style>
+      :root { --bg:#0b1020; --panel:#141b2d; --text:#e8ecff; --muted:#9aa6d1; --accent:#70a5ff; }
+      *{box-sizing:border-box} body{margin:0;background:linear-gradient(145deg,#090d1a,#0d1730);font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--text)}
+      .deck{max-width:1100px;margin:0 auto;padding:32px;display:grid;gap:24px}
+      section.slide{background:var(--panel);border:1px solid #1f2a44;border-radius:14px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+      h1,h2{margin:0 0 14px;font-size:1.8rem} ul{margin:0;padding-left:22px} li{margin:8px 0;line-height:1.35}
+    </style>
+  </head>
+  <body>
+    <main class="deck">
+      {% for slide in slides %}
+      <section class="slide" style="background:#141b2d;color:#e8ecff;">
+        {% if slide.index == 1 %}<h1>{{ slide.title }}</h1>{% else %}<h2>{{ slide.title }}</h2>{% endif %}
+        <ul>
+          {% for bullet in slide.bullets %}
+          <li>{{ bullet }}</li>
+          {% endfor %}
+        </ul>
+      </section>
+      {% endfor %}
+    </main>
+  </body>
+</html>
