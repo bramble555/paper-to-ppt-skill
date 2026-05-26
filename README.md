@@ -1,57 +1,39 @@
 # paper-to-ppt-skill
 
-Agent-agnostic Codex Skill for automating:
+Agent-agnostic Codex Skill for:
 
-`Academic PDF -> parsing -> structured understanding -> graduate-level slides -> editable PPTX`
+`Academic PDF -> paper detail report -> 10-12 page HTML briefing -> editable PPTX`
 
-## 安装（CLI）
+## 安装
 ```bash
 npx skills add https://github.com/bramble555/paper-to-ppt-skill
 ```
 
-> 这个 skill 设计为“下载后直接在 Codex / Antigravity 里运行”，不要求用户自己配置本地 Python 虚拟环境或 OpenAI API Key。
+## 运行流程（两阶段，含人工确认）
 
-## 使用方式（Agent 内直接运行）
-在 Codex 或 Antigravity 中调用本 skill，传入论文 PDF 路径与输出目录。
-
-示例命令：
+### 阶段一：先解析论文并生成详细汇报
 ```bash
-python scripts/run_pipeline.py \
-  --pdf /path/to/paper.pdf \
-  --output-dir ./out \
-  --ppt-theme templates/default_theme.json \
-  --html-template templates/html/base.html \
-  --html-preview
+python scripts/run_pipeline.py --pdf /path/to/paper.pdf
 ```
+默认输出目录是 `./out`，先生成：
+- `out/paper-detail.txt`
 
-## Agent-first 工作流
-1. `run_pipeline.py` 解析 PDF，输出 `parsed_paper.json`。
-2. 如需由 Agent 生成高质量 slide plan，可先导出提示词：
-   ```bash
-   python scripts/run_pipeline.py --pdf /path/to/paper.pdf --output-dir ./out --emit-agent-prompt
-   ```
-3. 将 `out/agent_prompt.txt` 交给 Codex/Antigravity agent，生成 `slide_plan.json`。
-4. 回填并生成最终 PPT：
-   ```bash
-   python scripts/run_pipeline.py \
-     --pdf /path/to/paper.pdf \
-     --output-dir ./out \
-     --agent-slide-plan-json ./out/slide_plan.json \
-     --html-preview
-   ```
+程序会中断并提示：
+“论文详细汇报已生成，是否同意以此内容开始生成 HTML 和 PPT？”
 
-> 若未提供 `--agent-slide-plan-json`，系统会使用内置 fallback 规划器生成可编辑草稿，供二次润色。
+### 阶段二：用户同意后继续生成 HTML + PPT
+```bash
+python scripts/run_pipeline.py --pdf /path/to/paper.pdf --approve-detail
+```
+会继续生成：
+- `out/preview.html`（10-12 页汇报版 HTML）
+- `out/presentation.pptx`（可编辑 PPT）
 
-## 输出
-- `out/presentation.pptx`（可编辑）
-- `out/preview.html` + `out/assets/slide-theme.css`（可选）
-- `out/parsed_paper.json`
-- `out/slide_plan.json`
-- `out/agent_prompt.txt`（可选）
+## 关键说明
+- HTML 预览使用模板化结构与样式，设计风格参考 `beautiful-html-templates`。
+- PPT 生成采用模板化结构转换策略，间接对齐 `frontend-slides` 的前端幻灯片排版思路。
+- 可通过 `--output-dir` 修改输出目录（默认 `./out`）。
 
-## 结构
-- `SKILL.md`：skill 触发与流程说明
-- `scripts/`：解析、规划、渲染流水线
-- `templates/`：PPT / HTML 模板
-- `assets/`：预览样式
-- `references/`：prompt 与 schema
+## 最终输出
+- `out/paper-detail.txt`
+- `out/presentation.pptx`

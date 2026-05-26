@@ -16,25 +16,30 @@ def _load_theme(theme_path: Path | None) -> dict:
 
 
 def generate_pptx(slide_plan: SlidePlan, output_path: Path, theme_path: Path | None = None) -> None:
+    """
+    Template-oriented PPT generator.
+    Indirectly mirrors frontend-slides style by converting structured slides
+    into clean title/body/note blocks with consistent typography.
+    """
     theme = _load_theme(theme_path)
     prs = Presentation()
 
     for item in slide_plan.slides:
-        layout = prs.slide_layouts[1]
-        slide = prs.slides.add_slide(layout)
+        slide = prs.slides.add_slide(prs.slide_layouts[1])
         title = slide.shapes.title
         title.text = item.title
-        title.text_frame.paragraphs[0].font.name = theme.get("title_font", "Calibri")
-        title.text_frame.paragraphs[0].font.size = Pt(theme.get("title_size_pt", 34))
-        title.text_frame.paragraphs[0].font.bold = True
-        title.text_frame.paragraphs[0].font.color.rgb = RGBColor(29, 47, 95)
+        tp = title.text_frame.paragraphs[0]
+        tp.font.name = theme.get("title_font", "Calibri")
+        tp.font.size = Pt(theme.get("title_size_pt", 34))
+        tp.font.bold = True
+        tp.font.color.rgb = RGBColor(29, 47, 95)
 
         body = slide.shapes.placeholders[1].text_frame
         body.clear()
         for idx, bullet in enumerate(item.bullets):
             p = body.paragraphs[0] if idx == 0 else body.add_paragraph()
             p.text = bullet
-            p.level = theme.get("bullet_indent_level_1", 0)
+            p.level = 0
             p.font.name = theme.get("body_font", "Calibri")
             p.font.size = Pt(theme.get("body_size_pt", 20))
 
