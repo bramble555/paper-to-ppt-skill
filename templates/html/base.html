@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>{{ deck_title }}</title>
+    <link rel="stylesheet" href="../assets/slide-theme.css" />
+  </head>
+  <body>
+    <main class="deck">
+      {% for slide in slides %}
+      <section class="slide">
+        <header>
+          <h2>{{ slide.title }}</h2>
+          <p class="section">{{ slide.section }}</p>
+        </header>
+        <ul>
+          {% for bullet in slide.bullets %}
+          <li>{{ bullet }}</li>
+          {% endfor %}
+        </ul>
+        <aside>
+          <h4>Speaker notes</h4>
+          <p>{{ slide.speaker_notes }}</p>
+        </aside>
+      </section>
+      {% endfor %}
+    </main>
+  </body>
+</html>

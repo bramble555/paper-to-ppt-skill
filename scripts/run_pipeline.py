@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 from pathlib import Path
 
 from html_preview import generate_html_preview
@@ -17,6 +18,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model", default="gpt-5", help="OpenAI model")
     parser.add_argument("--title-override", default=None, help="Optional deck title override")
     parser.add_argument("--html-preview", action="store_true", help="Generate HTML preview")
+    parser.add_argument("--ppt-theme", type=Path, default=Path("templates/default_theme.json"))
+    parser.add_argument("--html-template", type=Path, default=Path("templates/html/base.html"))
     return parser.parse_args()
 
 
@@ -31,10 +34,13 @@ def main() -> None:
         plan.deck_title = args.title_override
 
     pptx_path = args.output_dir / "presentation.pptx"
-    generate_pptx(plan, pptx_path)
+    generate_pptx(plan, pptx_path, theme_path=args.ppt_theme)
 
     if args.html_preview:
-        generate_html_preview(plan, args.output_dir / "preview.html")
+        assets_dir = args.output_dir / "assets"
+        assets_dir.mkdir(exist_ok=True)
+        shutil.copy(Path("assets/slide-theme.css"), assets_dir / "slide-theme.css")
+        generate_html_preview(plan, args.output_dir / "preview.html", template_path=args.html_template)
 
     (args.output_dir / "parsed_paper.json").write_text(parsed.model_dump_json(indent=2), encoding="utf-8")
     (args.output_dir / "slide_plan.json").write_text(json.dumps(plan.model_dump(), indent=2), encoding="utf-8")
